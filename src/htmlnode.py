@@ -24,7 +24,7 @@ class HTMLNode():
 
     def props_to_html(self):
         if self.props is None:
-            return
+            return ""
         
         html = ""
         
@@ -34,4 +34,6 @@ class HTMLNode():
         return html
 
     def __repr__(self):
-            return f"HTMLNode({self.tag}, {self.value}, children: {self.children}, {self.props})"
+        return f"{self.__class__.__name__}({self.tag}, {self.value}, children: {self.children}, {self.props})"
+
+
