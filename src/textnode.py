@@ -3,6 +3,14 @@ from enum import Enum
 
 import re
 
+class BlockType(Enum):
+    PARAGRAPH     = "paragraph"
+    HEADING       = "heading"
+    CODE          = "code"
+    QUOTE         = "quote"
+    UNORDEREDLIST = "unordered_list"
+    ORDEREDLIST   = "ordered_list"
+
 class TextType(Enum):
     TEXT = 'text'
     BOLD   = 'bold'
@@ -142,3 +150,22 @@ def markdown_to_blocks(markdown):
     cleaned_blocks = list(map(lambda x: [x.strip() for x in block_strings if x], block_strings))
 
     return cleaned_blocks[0]
+
+def block_to_block_type(md_block):
+    delimiter = md_block.split()[0].strip()
+
+    match delimiter:
+        case "#" | "##" | "###" | "####" | "#####" | "######":
+            return BlockType.HEADING
+        case "```":
+            return BlockType.CODE
+        case ">":
+            return BlockType.QUOTE
+        case "-":
+            return BlockType.UNORDEREDLIST
+        case str() if re.fullmatch(r"\d*.", delimiter):
+            return BlockType.ORDEREDLIST
+        case _:
+            return BlockType.PARAGRAPH
+
+

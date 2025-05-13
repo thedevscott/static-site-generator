@@ -1,5 +1,7 @@
 import unittest
 from textnode import (
+    BlockType,
+    block_to_block_type,
     split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
@@ -246,6 +248,38 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
+
+    def test_block_to_block_type(self):
+        md = """
+# This is a heading
+
+This is a paragraph of text. It has some **bold** and _italic_ words inside of it.
+
+- This is the first list item in a list block
+- This is a list item
+- This is another list item
+"""
+        block_types = []
+        expected = [BlockType.HEADING, BlockType.PARAGRAPH, BlockType.UNORDEREDLIST]
+
+        for block in markdown_to_blocks(md):
+            block_types.append(block_to_block_type(block))
+
+        self.assertEqual(block_types, expected)
+
+    def test_block_to_block_types(self):
+        block = "# heading"
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
+        block = "```\ncode\n```"
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
+        block = "> quote\n> more quote"
+        self.assertEqual(block_to_block_type(block), BlockType.QUOTE)
+        block = "- list\n- items"
+        self.assertEqual(block_to_block_type(block), BlockType.UNORDEREDLIST)
+        block = "1. list\n2. items"
+        self.assertEqual(block_to_block_type(block), BlockType.ORDEREDLIST)
+        block = "paragraph"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
 
 
 if __name__ == "__main__":
