@@ -10,6 +10,7 @@ from textnode import (
     extract_markdown_links,
     markdown_to_blocks,
     markdown_to_html_node,
+    extract_title,
 )
 
 from textnode import TextNode, TextType
@@ -314,6 +315,11 @@ the **same** even with inline stuff
             html,
             "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
         )
+
+    def test_extract_title(self):
+        actual = extract_title("# This is a title")
+        expected = "This is a title"
+        self.assertEqual(actual, expected)
 
 if __name__ == "__main__":
     unittest.main()
