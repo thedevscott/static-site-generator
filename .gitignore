@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+.DS_Store
 
 # C extensions
 *.so
@@ -17,7 +18,9 @@ eggs/
 lib/
 lib64/
 parts/
+public/ 
 sdist/
+static/
 var/
 wheels/
 share/python-wheels/

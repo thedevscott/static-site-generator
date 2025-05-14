@@ -1,7 +1,7 @@
 from htmlnode import HTMLNode, ParentNode
 from leafnode import LeafNode
 from enum import Enum
-
+import os, shutil
 import re
 
 class BlockType(Enum):
@@ -253,3 +253,19 @@ def text_to_children(text):
         html_node = text_node_to_html_node(node)
         children.append(html_node)
     return children
+
+
+def copy_static_to_public(source_dir, destination_dir):
+    if not os.path.exists(destination_dir):
+        os.mkdir(destination_dir)
+
+    for item in os.listdir(source_dir):
+        from_path = os.path.join(source_dir, item)
+        to_path = os.path.join(destination_dir, item)
+        print(f"\t* {from_path} -> {to_path}")
+
+        if os.path.isfile(from_path):
+            shutil.copy(from_path, to_path)
+        else:
+            copy_static_to_public(from_path, to_path)
+   
