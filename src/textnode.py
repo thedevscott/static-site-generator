@@ -1,3 +1,4 @@
+from htmlnode import HTMLNode, ParentNode
 from leafnode import LeafNode
 from enum import Enum
 
@@ -152,6 +153,9 @@ def markdown_to_blocks(markdown):
     return cleaned_blocks[0]
 
 def block_to_block_type(md_block):
+    if len(md_block) == 0:
+        return BlockType.PARAGRAPH
+
     delimiter = md_block.split()[0].strip()
 
     match delimiter:
@@ -168,4 +172,84 @@ def block_to_block_type(md_block):
         case _:
             return BlockType.PARAGRAPH
 
+def markdown_to_html_node(markdown):
+    md_blocks = markdown_to_blocks(markdown)
+    children = []
 
+    for block in md_blocks:
+        html_node = block_to_html_node(block)
+        children.append(html_node)
+    return ParentNode("div", children, None)
+
+
+def block_to_html_node(block):
+    block_type = block_to_block_type(block)
+    match block_type:
+        case BlockType.CODE:
+            if block.startswith("```") and block.endswith("```"):
+                value = block[4:-3]
+                text_node = TextNode(value, TextType.TEXT)
+                child = text_node_to_html_node(text_node)
+                code = ParentNode("code", [child])
+                return ParentNode("pre", [code])
+            else:
+                raise ValueError("Invalid code block")
+        case BlockType.HEADING:
+            depth = 0
+            for char in block:
+                if char == "#":
+                    depth += 1
+                else:
+                    break
+            if depth + 1 >= len(block):
+                raise ValueError(f"Invalid heading depth: {depth}")
+            text = block[depth+1:]
+            children = text_to_children(text)
+            return ParentNode(f"h{depth}", children)
+
+        case BlockType.ORDEREDLIST:
+            items = block.split("\n")
+            html_items = []
+            for item in items:
+                text = item[3:]
+                children = text_to_children(text)
+                html_items.append(ParentNode("li", children))
+            return ParentNode("ol", html_items)
+
+        case BlockType.UNORDEREDLIST:
+            items = block.split("\n")
+            html_items = []
+            for item in items:
+                text = item[2:]
+                children = text_to_children(text)
+                html_items.append(ParentNode("li", children))
+            return ParentNode("ul", html_items)
+
+        case BlockType.PARAGRAPH:
+            lines = block.split("\n")
+            paragraph = ' '.join(lines)
+            children = text_to_children(paragraph)
+            return ParentNode("p", children)
+
+        case BlockType.QUOTE:
+            lines = block.split("\n")
+            new_lines = []
+            for line in lines:
+                if line.startswith(">"):
+                    new_lines.append(line.lstrip(">").strip())
+                else:
+                    raise ValueError("Invalid quote block")
+            content = " ".join(new_lines)
+            children = text_to_children(content)
+            return ParentNode("blockquote", children)
+
+        case _:
+            raise ValueError(f"Invalide BlockType: {block_type}")
+
+def text_to_children(text):
+    nodes = text_to_textnodes(text)
+    children = []
+    for node in nodes:
+        html_node = text_node_to_html_node(node)
+        children.append(html_node)
+    return children
